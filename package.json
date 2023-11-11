@@ -24,5 +24,8 @@
         "lint-staged": "^15.0.2",
         "prettier": "3.0.3",
         "typescript": "^5.2.2"
+    },
+    "lint-staged":{
+        "*.ts": ["npm run lint:fix","npm run format:fix"]
     }
 }
