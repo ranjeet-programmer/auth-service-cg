@@ -77,5 +77,4 @@ describe("POST /auth/register", () => {
             expect(users[0].email).toBe(userData.email);
         });
     });
-    describe("Fields are missing", () => {});
 });
