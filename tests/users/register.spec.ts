@@ -97,5 +97,73 @@ describe("POST /auth/register", () => {
             expect(users[0]).toHaveProperty("role");
             expect(users[0].role).toBe(Roles.CUSTOMER);
         });
+        it("should store the hashed password in the database", async () => {
+            // A : arrange [ arrange all the data for test case]
+            const userData = {
+                firstName: "ranjeet",
+                lastName: "hinge",
+                email: "ab@gmail.com",
+                password: "secret_password",
+            };
+
+            // A : act [ trigger the action ]
+            await request(app).post("/auth/register").send(userData);
+
+            // assert
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+            expect(users[0].password).not.toBe(userData.password);
+            expect(users[0].password).toHaveLength(60);
+            expect(users[0].password).toMatch(/^\$2b\$\d+\$/);
+        });
+
+        it("should return 400 status code if email is already exists", async () => {
+            // A : arrange [ arrange all the data for test case]
+            const userData = {
+                firstName: "ranjeet",
+                lastName: "hinge",
+                email: "ab@gmail.com",
+                password: "secret_password",
+                role: Roles.CUSTOMER,
+            };
+
+            const userRepository = connection.getRepository(User);
+            await userRepository.save(userData);
+
+            // A : act [ trigger the action ]
+            const response = await request(app)
+                .post("/auth/register")
+                .send(userData);
+            const users = await userRepository.find();
+            // assert
+            expect(response.statusCode).toBe(400);
+            expect(users).toHaveLength(1);
+        });
+    });
+
+    describe("Fields are Missing", () => {
+        it("should return 400 status code if email field is missing", async () => {
+            // A : arrange [ arrange all the data for test case]
+            const userData = {
+                firstName: "ranjeet",
+                lastName: "hinge",
+                email: "",
+                password: "secret_password",
+            };
+
+            // A : act [ trigger the action ]
+            const response = await request(app)
+                .post("/auth/register")
+                .send(userData);
+
+            // A : assert [ check the expected output with actual output ]
+            expect(response.statusCode).toBe(400);
+
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+
+            //assert
+            expect(users).toHaveLength(0);
+        });
     });
 });
