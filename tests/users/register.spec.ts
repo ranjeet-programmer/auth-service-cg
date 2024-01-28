@@ -158,6 +158,81 @@ describe("POST /auth/register", () => {
 
             // A : assert [ check the expected output with actual output ]
             expect(response.statusCode).toBe(400);
+            console.log(response.body);
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            expect(response.body.errors[0].msg).toBe("Email is required");
+
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+
+            //assert
+            expect(users).toHaveLength(0);
+        });
+
+        it("should return 400 status code if first name is missing", async () => {
+            // A : arrange [ arrange all the data for test case]
+            const userData = {
+                firstName: "",
+                lastName: "hinge",
+                email: "",
+                password: "secret_password",
+            };
+
+            // A : act [ trigger the action ]
+            const response = await request(app)
+                .post("/auth/register")
+                .send(userData);
+
+            // A : assert [ check the expected output with actual output ]
+            expect(response.statusCode).toBe(400);
+
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+
+            //assert
+            expect(users).toHaveLength(0);
+        });
+
+        it("should return 400 status code if last name is missing", async () => {
+            // A : arrange [ arrange all the data for test case]
+            const userData = {
+                firstName: "ranjeet",
+                lastName: "",
+                email: "abc@gmail.com",
+                password: "secret_password",
+            };
+
+            // A : act [ trigger the action ]
+            const response = await request(app)
+                .post("/auth/register")
+                .send(userData);
+
+            // A : assert [ check the expected output with actual output ]
+            expect(response.statusCode).toBe(400);
+
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+
+            //assert
+            expect(users).toHaveLength(0);
+        });
+
+        it("should return 400 status code if password is missing", async () => {
+            // A : arrange [ arrange all the data for test case]
+            const userData = {
+                firstName: "ranjeet",
+                lastName: "",
+                email: "abc@gmail.com",
+                password: "",
+            };
+
+            // A : act [ trigger the action ]
+            const response = await request(app)
+                .post("/auth/register")
+                .send(userData);
+
+            // A : assert [ check the expected output with actual output ]
+            expect(response.statusCode).toBe(400);
 
             const userRepository = connection.getRepository(User);
             const users = await userRepository.find();
@@ -186,6 +261,56 @@ describe("POST /auth/register", () => {
             const user = users[0];
 
             expect(user.email).toBe("ab@gmail.com");
+        });
+
+        it("should return 400 status code if email is not a valid email", async () => {
+            // A : arrange [ arrange all the data for test case]
+            const userData = {
+                firstName: "ranjeet",
+                lastName: "hinge",
+                email: "invalid.email@com",
+                password: "secret_password",
+            };
+
+            // A : act [ trigger the action ]
+            const response = await request(app)
+                .post("/auth/register")
+                .send(userData);
+
+            //assert
+            expect(response.statusCode).toBe(400);
+
+            // user should not get created in db
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+
+            //assert
+            expect(users).toHaveLength(0);
+        });
+
+        it("should return 400 status code if password length is less than eight characters", async () => {
+            // A : arrange [ arrange all the data for test case]
+            const userData = {
+                firstName: "ranjeet",
+                lastName: "hinge",
+                email: "abc@gmail.com",
+                password: "test",
+            };
+
+            // A : act [ trigger the action ]
+            const response = await request(app)
+                .post("/auth/register")
+                .send(userData);
+
+            //assert
+            expect(response.statusCode).toBe(400);
+
+            // user should not get created in db
+            const userRepository = connection.getRepository(User);
+            const users = await userRepository.find();
+
+            //assert
+            expect(users).toHaveLength(0);
         });
     });
 });
